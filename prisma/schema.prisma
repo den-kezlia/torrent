@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum VisitStatus {
+  PLANNED
+  IN_PROGRESS
+  VISITED
+}
+
+model Street {
+  id          String          @id @default(cuid())
+  name        String
+  osmId       String          @unique
+  boundaryId  String?
+  // GeoJSON FeatureCollection for the whole street (optional summary geometry)
+  geometry    Json?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  segments    StreetSegment[]
+  visits      Visit[]
+  notes       Note[]
+  photos      Photo[]
+}
+
+model StreetSegment {
+  id         String   @id @default(cuid())
+  streetId   String
+  street     Street   @relation(fields: [streetId], references: [id], onDelete: Cascade)
+  osmId      String   @unique
+  // GeoJSON LineString geometry
+  geometry   Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Visit {
+  id         String       @id @default(cuid())
+  streetId   String
+  street     Street       @relation(fields: [streetId], references: [id], onDelete: Cascade)
+  status     VisitStatus
+  at         DateTime     @default(now())
+  // optional location where marked visited
+  location   Json?
+}
+
+model Note {
+  id         String    @id @default(cuid())
+  streetId   String
+  street     Street    @relation(fields: [streetId], references: [id], onDelete: Cascade)
+  content    String
+  tags       String[]  @default([])
+  createdAt  DateTime  @default(now())
+}
+
+model Photo {
+  id         String    @id @default(cuid())
+  streetId   String
+  street     Street    @relation(fields: [streetId], references: [id], onDelete: Cascade)
+  url        String
+  blobKey    String    @unique
+  width      Int?
+  height     Int?
+  createdAt  DateTime  @default(now())
+}
