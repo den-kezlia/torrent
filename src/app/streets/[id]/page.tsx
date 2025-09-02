@@ -3,6 +3,9 @@ import Link from 'next/link'
 import { PhotoUploader } from '@/components/photos/uploader'
 import { VisitStatusPicker } from '@/components/visits/status-picker'
 import { AddNote } from '@/components/notes/add-note'
+import type { FeatureCollection, LineString } from 'geojson'
+import StreetMap from '@/components/map/street-map'
+import DirectionsButton from '@/components/map/directions-button'
 
 export default async function StreetDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -23,6 +26,20 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
   )
 
   const lastStatus = s.visits[0]?.status ?? '—'
+  const fc: FeatureCollection<LineString, { status?: string }> = {
+    type: 'FeatureCollection',
+    features: s.segments
+      .map((seg) => seg.geometry as any)
+      .filter((g): g is LineString => g && g.type === 'LineString')
+      .map((g) => ({ type: 'Feature', geometry: g, properties: { status: s.visits[0]?.status ?? undefined } }))
+  }
+  // Compute a start point from the first segment's first coordinate
+  const firstLine = s.segments
+    .map((seg) => seg.geometry as any)
+    .find((g): g is LineString => g && g.type === 'LineString')
+  const dest: [number, number] | null = firstLine && Array.isArray(firstLine.coordinates[0])
+    ? (firstLine.coordinates[0] as [number, number])
+    : null
 
   return (
     <main className="min-h-screen p-4 space-y-4">
@@ -34,6 +51,10 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
           <div className="flex items-center gap-3 text-sm">
             <span className="rounded bg-muted px-2 py-0.5">{lastStatus}</span>
             <VisitStatusPicker streetId={s.id} value={s.visits[0]?.status ?? null} />
+          </div>
+          {dest ? <DirectionsButton dest={dest} className="mt-3" /> : null}
+          <div className="mt-3">
+            <StreetMap data={fc} status={s.visits[0]?.status ?? null} />
           </div>
         </div>
         <div className="rounded-md border p-4 space-y-3">
