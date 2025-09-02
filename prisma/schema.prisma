@@ -4,7 +4,10 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // Prisma Client runtime (e.g., Accelerate)
+  url       = env("PRISMA_DATABASE_URL")
+  // Direct connection used by Prisma Migrate/Introspection
+  directUrl = env("PRISMA_DATABASE_URL")
 }
 
 enum VisitStatus {

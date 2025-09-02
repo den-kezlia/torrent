@@ -11,7 +11,7 @@ Track visited streets in Torrent, Valencia. Next.js 15 (App Router, TS), Prisma 
 
 ## Setup
 1. Copy `.env.example` to `.env.local` and fill values:
-   - DATABASE_URL
+   - PRISMA_DATABASE_URL
    - BLOB_READ_WRITE_TOKEN
    - MAPTILER_API_KEY
    - NEXT_PUBLIC_MAPTILER_API_KEY
