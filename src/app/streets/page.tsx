@@ -81,6 +81,9 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
     <main className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-4">
       <aside className="space-y-4">
         <h1 className="text-xl font-semibold">Streets</h1>
+        <Link href="/streets/random" className="inline-flex items-center rounded-md border px-3 py-2 text-sm hover:bg-muted/50">
+          Open random street
+        </Link>
         <form className="space-y-3" role="search" aria-label="Filter streets" method="get">
           <div className="space-y-1">
             <label className="text-sm font-medium" htmlFor="search">Search</label>
@@ -117,7 +120,7 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
         </div>
       </aside>
       <section className="space-y-4">
-        <div className="flex items-center gap-4 border-b">
+  <div className="flex items-center gap-4 border-b">
           <button className="px-3 py-2 border-b-2 border-transparent data-[active=true]:border-primary" data-active>
             List
           </button>
