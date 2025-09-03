@@ -11,14 +11,17 @@ export function VisitStatusPicker({ streetId, value }: { streetId: string; value
 
   async function onChange(next: string) {
     setStatus(next as any)
-    if (!next) return
     setBusy(true)
     try {
-      await fetch(`/api/streets/${streetId}/visit`, {
-        method: 'PATCH',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ status: next })
-      })
+      if (!next) {
+        await fetch(`/api/streets/${streetId}/visit`, { method: 'DELETE' })
+      } else {
+        await fetch(`/api/streets/${streetId}/visit`, {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ status: next })
+        })
+      }
       router.refresh()
     } finally {
       setBusy(false)
@@ -29,7 +32,7 @@ export function VisitStatusPicker({ streetId, value }: { streetId: string; value
     <label className="inline-flex items-center gap-2 text-sm">
       <span className="text-muted-foreground">Set status:</span>
       <select
-        className="rounded-md border px-2 py-1"
+  className="rounded-md border bg-background text-foreground px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         value={status}
         disabled={busy}
         onChange={(e) => onChange(e.target.value)}

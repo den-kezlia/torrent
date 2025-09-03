@@ -44,5 +44,26 @@
 }
 
 body {
-  @apply bg-background text-foreground antialiased;
+  /* Site background: gray in light, dark in dark */
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+.dark body {
+  /* Almost black background in dark mode */
+  background-color: hsl(240 10% 3%);
+}
+
+::selection {
+  background-color: hsl(var(--primary) / 0.2);
+  color: hsl(var(--foreground));
+}
+
+/* Smooth cards and surfaces */
+.shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04); }
+.shadow { box-shadow: 0 2px 8px -2px rgb(0 0 0 / 0.08); }
+
+/* Better focus ring contrast */
+:focus-visible { outline-offset: 2px; }

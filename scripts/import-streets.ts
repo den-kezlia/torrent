@@ -17,12 +17,17 @@ async function main() {
       type: 'string',
       describe: 'Boundary name for Overpass import (e.g., "Torrent, Valencia")'
     })
+    .option('no-prune', {
+      type: 'boolean',
+      describe: 'Do not prune previously imported unnamed streets',
+      default: false
+    })
     .help()
     .parseSync()
 
   const boundary = argv.boundary || 'Torrent, Valencia'
   console.log('Importing streets for boundary:', boundary)
-  const res = await importStreets(boundary)
+  const res = await importStreets(boundary, { pruneUnnamed: !argv['no-prune'] })
   console.log('Import result:', res)
 }
 

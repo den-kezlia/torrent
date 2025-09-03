@@ -56,6 +56,10 @@ model Note {
   content    String
   tags       String[]  @default([])
   createdAt  DateTime  @default(now())
+  photos     Photo[]
+  // Optional WGS84 coordinates saved when user opts in from UI
+  lng        Float?
+  lat        Float?
 }
 
 model Photo {
@@ -67,4 +71,9 @@ model Photo {
   width      Int?
   height     Int?
   createdAt  DateTime  @default(now())
+  noteId     String?
+  note       Note?     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  // Optional WGS84 coordinates if available from EXIF or user input
+  lng        Float?
+  lat        Float?
 }

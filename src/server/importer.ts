@@ -39,11 +39,12 @@ async function fetchAreaId(boundary: string): Promise<number> {
 }
 
 async function fetchHighwaysInArea(areaId: number): Promise<OverpassResponse> {
+  // Only fetch named streets and limit to common roadway types (exclude service paths, tracks, etc.)
   const query = q`
     [out:json][timeout:180];
     area(${areaId})->.searchArea;
     (
-      way["highway"](area.searchArea);
+      way["highway"~"^(residential|primary|secondary|tertiary|unclassified|living_street|trunk|trunk_link|motorway|motorway_link)$"]["name"](area.searchArea);
     );
     (._;>;);
     out body;
@@ -69,7 +70,24 @@ function normalizeStreetKey(name: string) {
   return `street-name:${name.trim().toLowerCase()}`
 }
 
-export async function importStreets(boundary = 'Torrent, Valencia') {
+function pickStreetName(tags?: Record<string, string>) {
+  if (!tags) return undefined
+  // Prefer generic name, then localized variants commonly used in Valencia area
+  return (
+    tags['name']?.trim() ||
+    tags['name:ca']?.trim() ||
+    tags['name:val']?.trim() ||
+    tags['name:es']?.trim() ||
+    tags['official_name']?.trim() ||
+    undefined
+  )
+}
+
+export async function importStreets(
+  boundary = 'Torrent, Valencia',
+  opts: { pruneUnnamed?: boolean } = {}
+) {
+  const pruneUnnamed = opts.pruneUnnamed ?? true
   // Attempt exact match by full boundary string; fallback to first token before comma if not found
   let areaId: number
   try {
@@ -88,11 +106,12 @@ export async function importStreets(boundary = 'Torrent, Valencia') {
     else if (el.type === 'way') ways.push(el)
   }
 
-  // Group ways by street name; keep unnamed as individual streets
+  // Group ways by street name; skip unnamed ways entirely
   const groups = new Map<string, Array<typeof ways[number]>>()
   for (const w of ways) {
-    const name = w.tags?.name?.trim()
-    const key = name ? normalizeStreetKey(name) : `street-way:${w.id}`
+    const name = pickStreetName(w.tags)
+    if (!name) continue
+    const key = normalizeStreetKey(name)
     const arr = groups.get(key) ?? []
     arr.push(w)
     groups.set(key, arr)
@@ -104,8 +123,8 @@ export async function importStreets(boundary = 'Torrent, Valencia') {
 
   for (const [key, wlist] of groups) {
     if (!Array.isArray(wlist) || wlist.length === 0) continue
-    const first = wlist[0]!
-    const name = first.tags?.name ?? `Way ${first.id}`
+  const first = wlist[0]!
+  const name = pickStreetName(first.tags)!
     const street = await prisma.street.upsert({
       where: { osmId: key },
       update: { name },
@@ -127,5 +146,12 @@ export async function importStreets(boundary = 'Torrent, Valencia') {
     }
   }
 
-  return { createdStreets, updatedStreets, upsertedSegments }
+  // Optionally prune legacy unnamed imports (those created previously as individual ways)
+  let prunedUnnamed = 0
+  if (pruneUnnamed) {
+    const del = await prisma.street.deleteMany({ where: { osmId: { startsWith: 'street-way:' } } })
+    prunedUnnamed = del.count
+  }
+
+  return { createdStreets, updatedStreets, upsertedSegments, prunedUnnamed }
 }
