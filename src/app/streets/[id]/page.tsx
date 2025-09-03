@@ -9,6 +9,7 @@ import type { FeatureCollection, LineString } from 'geojson'
 import StreetMap from '@/components/map/street-map'
 import DirectionsButton from '@/components/map/directions-button'
 import { PhotoDeleteButton } from '@/components/photos/delete-button'
+import { PhotoGrid } from '@/components/photos/photo-grid'
 
 export default async function StreetDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -62,23 +63,13 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
         </div>
         <div className="rounded-xl border p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="font-medium">Photos</h2>
+            <h2 className="font-medium">Gallery</h2>
             <PhotoUploader streetId={s.id} />
           </div>
           {s.photos.length === 0 ? (
             <p className="text-sm text-muted-foreground">No photos yet.</p>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-              {s.photos.map((p) => (
-                <div key={p.id} className="group relative overflow-hidden rounded-md border">
-                  <a href={p.url} target="_blank" rel="noreferrer" aria-label="Open photo">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.url} alt="Street photo" className="aspect-square object-cover" />
-                  </a>
-                  <PhotoDeleteButton id={p.id} canDelete={p.noteId == null} />
-                </div>
-              ))}
-            </div>
+            <PhotoGrid photos={s.photos as any} />
           )}
         </div>
       </section>

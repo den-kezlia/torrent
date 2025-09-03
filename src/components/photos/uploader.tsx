@@ -29,8 +29,11 @@ export function PhotoUploader({ streetId }: { streetId: string }) {
 
   return (
     <label className="inline-flex items-center gap-2 text-sm">
-      <input type="file" onChange={onFileChange} disabled={busy} aria-label="Upload photo" />
-      {busy ? 'Uploading…' : 'Upload photo'}
+      <span className="sr-only">Upload photo</span>
+      <button type="button" className="rounded-md border px-3 py-2 text-sm" onClick={() => document.getElementById(`file-${streetId}`)?.click()} disabled={busy}>
+        {busy ? 'Uploading…' : 'Choose file'}
+      </button>
+      <input id={`file-${streetId}`} type="file" onChange={onFileChange} disabled={busy} className="hidden" aria-label="Upload photo" />
     </label>
   )
 }

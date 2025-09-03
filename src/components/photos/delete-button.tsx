@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { Trash2 } from 'lucide-react'
 
 export function PhotoDeleteButton({ id, canDelete }: { id: string; canDelete: boolean }) {
   const [open, setOpen] = useState(false)
@@ -21,11 +22,17 @@ export function PhotoDeleteButton({ id, canDelete }: { id: string; canDelete: bo
 
   return (
     <>
-      <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <Button size="sm" variant="destructive" onClick={() => setOpen(true)} disabled={!canDelete || busy} aria-disabled={!canDelete} title={canDelete ? 'Delete photo' : 'Photo managed by note'}>
-          Delete
-        </Button>
-      </div>
+      <Button
+        size="sm"
+        variant="destructive"
+        onClick={() => setOpen(true)}
+        disabled={!canDelete || busy}
+        aria-disabled={!canDelete}
+        aria-label={canDelete ? 'Delete photo' : 'Photo managed by note'}
+        className="p-2 h-8 w-8 rounded-full shadow"
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
       <ConfirmDialog
         open={open}
         onOpenChange={setOpen}
