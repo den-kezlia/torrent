@@ -2,17 +2,18 @@ import { ButtonHTMLAttributes, forwardRef } from 'react'
 import { cn } from '@/lib/utils'
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: 'default' | 'outline' | 'ghost'
+  variant?: 'default' | 'outline' | 'ghost' | 'destructive'
   size?: 'sm' | 'md' | 'lg'
 }
 
 export const Button = forwardRef<HTMLButtonElement, Props>(
   ({ className, variant = 'default', size = 'md', ...props }, ref) => {
     const base = 'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none'
-    const variants = {
+    const variants: Record<NonNullable<Props['variant']>, string> = {
       default: 'bg-primary text-primary-foreground hover:opacity-90',
       outline: 'border bg-background hover:bg-muted',
-      ghost: 'hover:bg-muted'
+      ghost: 'hover:bg-muted',
+      destructive: 'bg-destructive text-destructive-foreground hover:opacity-90'
     }
     const sizes = {
       sm: 'h-8 px-2',

@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { PhotoUploader } from '@/components/photos/uploader'
 import { VisitStatusPicker } from '@/components/visits/status-picker'
 import { AddNote } from '@/components/notes/add-note'
+import { NoteMarkdown } from '@/components/notes/markdown'
+import { NoteView } from '@/components/notes/note-view'
 import type { FeatureCollection, LineString } from 'geojson'
 import StreetMap from '@/components/map/street-map'
 import DirectionsButton from '@/components/map/directions-button'
@@ -82,18 +84,23 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
         {s.notes.length === 0 ? (
           <p className="text-sm text-muted-foreground">No notes yet.</p>
         ) : (
-          <ul className="space-y-2">
-            {s.notes.map((n) => (
-              <li key={n.id} className="rounded-md border p-3">
-                <div className="text-sm">{n.content}</div>
-                {n.tags?.length ? (
-                  <div className="mt-1 text-xs text-muted-foreground">{n.tags.map((t) => `#${t}`).join(' ')}</div>
-                ) : null}
-              </li>
-            ))}
-          </ul>
+          <NotesList notes={s.notes} streetId={s.id} />
         )}
       </section>
     </main>
   )
 }
+
+function NotesList({ notes, streetId }: { notes: { id: string, content: string, createdAt: Date, tags: string[] }[], streetId: string }) {
+  return (
+    <ul className="space-y-3">
+      {notes.map((n) => (
+        <li key={n.id} className="rounded-md border p-3">
+          <NoteView id={n.id} content={n.content} createdAt={n.createdAt} tags={n.tags} streetId={streetId} />
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+// client-only edit toggling moved to components/notes/edit-toggle

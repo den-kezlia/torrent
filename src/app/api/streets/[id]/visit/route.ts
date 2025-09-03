@@ -4,8 +4,9 @@ import { prisma } from '@/server/db'
 const paramsSchema = z.object({ id: z.string().min(1) })
 const bodySchema = z.object({ status: z.enum(['PLANNED', 'IN_PROGRESS', 'VISITED']) })
 
-export async function PATCH(req: Request, ctx: any) {
-  const parsedParams = paramsSchema.safeParse(ctx?.params)
+export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const params = await ctx.params
+  const parsedParams = paramsSchema.safeParse(params)
   if (!parsedParams.success) return Response.json({ error: 'Invalid id' }, { status: 400 })
   const json = await req.json().catch(() => null)
   const parsedBody = bodySchema.safeParse(json)

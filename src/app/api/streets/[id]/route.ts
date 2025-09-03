@@ -4,8 +4,9 @@ import { streetDetailSchema } from '@/server/types'
 
 const paramsSchema = z.object({ id: z.string().min(1) })
 
-export async function GET(_req: Request, ctx: any) {
-  const parsed = paramsSchema.safeParse(ctx?.params)
+export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const params = await ctx.params
+  const parsed = paramsSchema.safeParse(params)
   if (!parsed.success) return Response.json({ error: 'Invalid id' }, { status: 400 })
 
   const s = await prisma.street.findUnique({

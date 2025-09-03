@@ -6,8 +6,9 @@ export const dynamic = 'force-dynamic'
 
 const paramsSchema = z.object({ id: z.string().min(1) })
 
-export async function POST(req: Request, ctx: any) {
-  const parsed = paramsSchema.safeParse(ctx?.params)
+export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const params = await ctx.params
+  const parsed = paramsSchema.safeParse(params)
   if (!parsed.success) return Response.json({ error: 'Invalid id' }, { status: 400 })
 
   const filename = (req.headers.get('x-filename') || '').trim()

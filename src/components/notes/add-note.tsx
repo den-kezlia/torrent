@@ -1,6 +1,7 @@
 "use client"
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { RichTextEditor } from './rich-text-editor'
 
 export function AddNote({ streetId }: { streetId: string }) {
   const [value, setValue] = useState('')
@@ -24,12 +25,29 @@ export function AddNote({ streetId }: { streetId: string }) {
     }
   }
 
+  async function uploadImage(file: File): Promise<string> {
+    // Reuse photos API for storage. We upload and get a public URL back.
+    const res = await fetch(`/api/streets/${streetId}/photos`, {
+      method: 'POST',
+      headers: {
+        'content-type': file.type || 'application/octet-stream',
+        'x-filename': encodeURIComponent(file.name)
+      },
+      body: await file.arrayBuffer()
+    })
+    if (!res.ok) throw new Error('Upload failed')
+    const json = await res.json()
+    return json.url as string
+  }
+
   return (
-    <form className="flex gap-2" onSubmit={submit} aria-label="Add a note">
-      <input className="flex-1 rounded-md border px-3 py-2" placeholder="Add a note" value={value} onChange={(e) => setValue(e.target.value)} />
-      <button className="rounded-md border px-3 py-2 text-sm" disabled={busy || !value.trim()}>
-        {busy ? 'Adding…' : 'Add'}
-      </button>
+    <form className="space-y-2" onSubmit={submit} aria-label="Add a note">
+      <RichTextEditor value={value} onChange={setValue} onUploadImage={uploadImage} placeholder="Write a note… Use toolbar for headings, lists, images." />
+      <div className="flex justify-end">
+        <button className="rounded-md border px-3 py-2 text-sm" disabled={busy || !value.trim()}>
+          {busy ? 'Adding…' : 'Add note'}
+        </button>
+      </div>
     </form>
   )
 }

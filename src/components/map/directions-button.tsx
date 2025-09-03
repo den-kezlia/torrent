@@ -18,7 +18,7 @@ export function DirectionsButton({
 
   return (
     <a href={href} target="_blank" rel="noreferrer" className={className}>
-      <Button type="button">Directions to start</Button>
+      <Button type="button">Direction</Button>
     </a>
   )
 }
