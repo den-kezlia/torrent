@@ -51,12 +51,12 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
       <h1 className="text-2xl font-semibold tracking-tight">{s.name}</h1>
       <section className="grid gap-6 md:grid-cols-2">
         <div className="rounded-xl border p-4 space-y-3">
-          <h2 className="font-medium">Status</h2>
-          <div className="flex items-center gap-3 text-sm">
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            <span className="font-medium">Status</span>
             <span className="rounded bg-muted px-2 py-0.5">{lastStatus}</span>
             <VisitStatusPicker streetId={s.id} value={s.visits[0]?.status ?? null} />
+            {dest ? <DirectionsButton dest={dest} className="ml-auto" /> : null}
           </div>
-          {dest ? <DirectionsButton dest={dest} className="mt-3" /> : null}
           <div className="mt-3">
             <StreetMap data={fc} status={s.visits[0]?.status ?? null} />
           </div>
