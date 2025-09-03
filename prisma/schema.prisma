@@ -70,4 +70,7 @@ model Photo {
   createdAt  DateTime  @default(now())
   noteId     String?
   note       Note?     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  // Optional WGS84 coordinates if available from EXIF or user input
+  lng        Float?
+  lat        Float?
 }

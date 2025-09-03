@@ -22,7 +22,16 @@ export const streetDetailSchema = z.object({
     z.object({ id: z.string(), osmId: z.string(), geometry: z.any(), updatedAt: z.string() })
   ),
   photos: z.array(
-    z.object({ id: z.string(), url: z.string().url(), width: z.number().nullable().optional(), height: z.number().nullable().optional(), noteId: z.string().nullable().optional() })
+    z.object({
+      id: z.string(),
+      url: z.string().url(),
+      createdAt: z.string(),
+      width: z.number().nullable().optional(),
+      height: z.number().nullable().optional(),
+      noteId: z.string().nullable().optional(),
+      lng: z.number().nullable().optional(),
+      lat: z.number().nullable().optional()
+    })
   ),
   notes: z.array(z.object({ id: z.string(), content: z.string(), tags: z.array(z.string()), createdAt: z.string() })),
   lastStatus: visitStatusEnum.nullable()

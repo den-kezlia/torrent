@@ -12,13 +12,38 @@ import { prettyStatus } from '@/lib/utils'
 import { PhotoDeleteButton } from '@/components/photos/delete-button'
 import { PhotoGrid } from '@/components/photos/photo-grid'
 
+function stripMarkdown(input: string): string {
+  return input
+    // code fences
+    .replace(/```[\s\S]*?```/g, '')
+    // inline code
+    .replace(/`([^`]*)`/g, '$1')
+    // images ![alt](url) -> alt
+    .replace(/!\[([^\]]*)\]\([^\)]*\)/g, '$1')
+    // links [text](url) -> text
+    .replace(/\[([^\]]*)\]\([^\)]*\)/g, '$1')
+    // emphasis **text** *text* __text__ _text_ -> text
+    .replace(/([*_]{1,3})([^*_]+)\1/g, '$2')
+    // headings
+    .replace(/^\s{0,3}#{1,6}\s+/gm, '')
+    // blockquotes
+    .replace(/^\s{0,3}>\s?/gm, '')
+    // list markers
+    .replace(/^\s*([-*+]\s+|\d+\.\s+)/gm, '')
+    // html tags
+    .replace(/<[^>]+>/g, '')
+    // collapse whitespace
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 export default async function StreetDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const s = await prisma.street.findUnique({
     where: { id },
     include: {
-      photos: { orderBy: { createdAt: 'desc' } },
-      notes: { orderBy: { createdAt: 'desc' } },
+  photos: { orderBy: { createdAt: 'desc' } },
+  notes: { orderBy: { createdAt: 'desc' } },
       visits: { orderBy: { at: 'desc' }, take: 1 },
       segments: true
     }
@@ -58,7 +83,17 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
             {dest ? <DirectionsButton dest={dest} className="ml-auto" /> : null}
           </div>
           <div className="mt-3">
-            <StreetMap data={fc} status={s.visits[0]?.status ?? null} />
+            <StreetMap
+              data={fc}
+              status={s.visits[0]?.status ?? null}
+              photos={(s.photos as any[])
+                .filter((p) => p.lng != null && p.lat != null)
+                .map((p) => {
+                  const note = (s.notes as any[]).find((n) => p.noteId === n.id)
+                  const text = note?.content ? stripMarkdown(note.content).slice(0, 120) : undefined
+                  return { id: p.id, lng: p.lng, lat: p.lat, url: p.url, text }
+                })}
+            />
           </div>
         </div>
   <div className="rounded-xl border bg-background p-4 space-y-3">

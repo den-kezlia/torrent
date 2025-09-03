@@ -25,7 +25,16 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     osmId: s.osmId,
     geometry: s.geometry ?? null,
     segments: s.segments.map((g) => ({ id: g.id, osmId: g.osmId, geometry: g.geometry, updatedAt: g.updatedAt.toISOString() })),
-  photos: s.photos.map((p) => ({ id: p.id, url: p.url, width: p.width ?? null, height: p.height ?? null, noteId: (p as any).noteId ?? null })),
+    photos: s.photos.map((p) => ({
+      id: p.id,
+      url: p.url,
+      createdAt: p.createdAt.toISOString(),
+      width: p.width ?? null,
+      height: p.height ?? null,
+      noteId: (p as any).noteId ?? null,
+      lng: (p as any).lng ?? null,
+      lat: (p as any).lat ?? null
+    })),
     notes: s.notes.map((n) => ({ id: n.id, content: n.content, tags: n.tags, createdAt: n.createdAt.toISOString() })),
     lastStatus: s.visits[0]?.status ?? null
   })

@@ -1,0 +1,4 @@
+-- Add optional geolocation to Photo
+ALTER TABLE "Photo"
+  ADD COLUMN IF NOT EXISTS "lng" DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS "lat" DOUBLE PRECISION;
