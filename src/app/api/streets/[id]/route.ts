@@ -13,7 +13,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     where: { id: parsed.data.id },
     include: {
       segments: { orderBy: { updatedAt: 'desc' } },
-      photos: true,
+  photos: true,
       notes: { orderBy: { createdAt: 'desc' } },
       visits: { orderBy: { at: 'desc' }, take: 1 }
     }
@@ -25,7 +25,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     osmId: s.osmId,
     geometry: s.geometry ?? null,
     segments: s.segments.map((g) => ({ id: g.id, osmId: g.osmId, geometry: g.geometry, updatedAt: g.updatedAt.toISOString() })),
-    photos: s.photos.map((p) => ({ id: p.id, url: p.url, width: p.width ?? null, height: p.height ?? null })),
+  photos: s.photos.map((p) => ({ id: p.id, url: p.url, width: p.width ?? null, height: p.height ?? null, noteId: (p as any).noteId ?? null })),
     notes: s.notes.map((n) => ({ id: n.id, content: n.content, tags: n.tags, createdAt: n.createdAt.toISOString() })),
     lastStatus: s.visits[0]?.status ?? null
   })

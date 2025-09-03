@@ -8,6 +8,7 @@ import { NoteView } from '@/components/notes/note-view'
 import type { FeatureCollection, LineString } from 'geojson'
 import StreetMap from '@/components/map/street-map'
 import DirectionsButton from '@/components/map/directions-button'
+import { PhotoDeleteButton } from '@/components/photos/delete-button'
 
 export default async function StreetDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -21,7 +22,7 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
     }
   })
   if (!s) return (
-    <main className="min-h-screen p-4">
+    <main className="min-h-screen">
       <Link href="/streets" className="text-sm text-muted-foreground hover:underline">← Back</Link>
       <p className="mt-4">Not found</p>
     </main>
@@ -44,11 +45,11 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
     : null
 
   return (
-    <main className="min-h-screen p-4 space-y-4">
+    <main className="min-h-screen space-y-6">
       <Link href="/streets" className="text-sm text-muted-foreground hover:underline">← Back</Link>
-      <h1 className="text-xl font-semibold">{s.name}</h1>
-      <section className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-md border p-4 space-y-2">
+      <h1 className="text-2xl font-semibold tracking-tight">{s.name}</h1>
+      <section className="grid gap-6 md:grid-cols-2">
+        <div className="rounded-xl border p-4 space-y-3">
           <h2 className="font-medium">Status</h2>
           <div className="flex items-center gap-3 text-sm">
             <span className="rounded bg-muted px-2 py-0.5">{lastStatus}</span>
@@ -59,7 +60,7 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
             <StreetMap data={fc} status={s.visits[0]?.status ?? null} />
           </div>
         </div>
-        <div className="rounded-md border p-4 space-y-3">
+        <div className="rounded-xl border p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="font-medium">Photos</h2>
             <PhotoUploader streetId={s.id} />
@@ -69,16 +70,19 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
               {s.photos.map((p) => (
-                <a key={p.id} href={p.url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-md border">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.url} alt="Street photo" className="aspect-square object-cover" />
-                </a>
+                <div key={p.id} className="group relative overflow-hidden rounded-md border">
+                  <a href={p.url} target="_blank" rel="noreferrer" aria-label="Open photo">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.url} alt="Street photo" className="aspect-square object-cover" />
+                  </a>
+                  <PhotoDeleteButton id={p.id} canDelete={p.noteId == null} />
+                </div>
               ))}
             </div>
           )}
         </div>
       </section>
-      <section className="rounded-md border p-4 space-y-3">
+      <section className="rounded-xl border p-4 space-y-3">
         <h2 className="font-medium">Notes</h2>
   <AddNote streetId={s.id} />
         {s.notes.length === 0 ? (
@@ -95,7 +99,7 @@ function NotesList({ notes, streetId }: { notes: { id: string, content: string, 
   return (
     <ul className="space-y-3">
       {notes.map((n) => (
-        <li key={n.id} className="rounded-md border p-3">
+  <li key={n.id} className="rounded-xl border p-3">
           <NoteView id={n.id} content={n.content} createdAt={n.createdAt} tags={n.tags} streetId={streetId} />
         </li>
       ))}

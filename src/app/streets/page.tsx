@@ -76,9 +76,9 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
   }
 
   return (
-    <main className="min-h-screen grid grid-cols-1 md:grid-cols-[320px_1fr]">
-      <aside className="border-r p-4 space-y-4">
-        <h1 className="text-xl font-semibold">Torrent Streets</h1>
+    <main className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-4">
+      <aside className="space-y-4">
+        <h1 className="text-xl font-semibold">Streets</h1>
         <form className="space-y-3" role="search" aria-label="Filter streets" method="get">
           <div className="space-y-1">
             <label className="text-sm font-medium" htmlFor="search">Search</label>
@@ -114,21 +114,21 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
           <progress className="w-full h-2 [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-primary rounded" value={Number(visitedCount)} max={Number(Math.max(1, totalCount))} aria-label="Visited progress" />
         </div>
       </aside>
-      <section className="p-4 space-y-4">
+      <section className="space-y-4">
         <div className="flex items-center gap-4 border-b">
           <button className="px-3 py-2 border-b-2 border-transparent data-[active=true]:border-primary" data-active>
             List
           </button>
           <Link className="px-3 py-2 text-muted-foreground hover:text-foreground" href="/map">Map</Link>
         </div>
-        <div role="region" aria-label="Streets list" className="grid gap-2">
+        <div role="region" aria-label="Streets list" className="grid gap-3">
           {items.map((s) => (
-            <Link key={s.id} href={`/streets/${s.id}`} className="rounded-md border p-3 hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring">
+            <Link key={s.id} href={`/streets/${s.id}`} className="group rounded-xl border p-4 hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring transition-colors">
               <div className="flex items-center justify-between">
-                <div className="font-medium">{s.name}</div>
+                <div className="font-medium group-hover:underline">{s.name}</div>
                 <span className="text-xs rounded bg-muted px-2 py-0.5">{s.lastStatus ?? '—'}</span>
               </div>
-              <div className="text-sm text-muted-foreground">{s.segments} segments • {s.photos} photos • {s.notes} notes</div>
+              <div className="text-sm text-muted-foreground mt-1">{s.segments} segments • {s.photos} photos • {s.notes} notes</div>
             </Link>
           ))}
         </div>

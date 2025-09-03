@@ -56,6 +56,7 @@ model Note {
   content    String
   tags       String[]  @default([])
   createdAt  DateTime  @default(now())
+  photos     Photo[]
 }
 
 model Photo {
@@ -67,4 +68,6 @@ model Photo {
   width      Int?
   height     Int?
   createdAt  DateTime  @default(now())
+  noteId     String?
+  note       Note?     @relation(fields: [noteId], references: [id], onDelete: Cascade)
 }
