@@ -44,7 +44,21 @@
 }
 
 body {
-  @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-foreground;
+  /* Site background: gray in light, dark in dark */
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dark body {
+  /* Almost black background in dark mode */
+  background-color: hsl(240 10% 3%);
+}
+
+::selection {
+  background-color: hsl(var(--primary) / 0.2);
+  color: hsl(var(--foreground));
 }
 
 /* Smooth cards and surfaces */

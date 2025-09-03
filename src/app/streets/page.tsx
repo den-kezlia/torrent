@@ -125,7 +125,7 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
         </div>
         <div role="region" aria-label="Streets list" className="grid gap-3">
           {items.map((s) => (
-            <Link key={s.id} href={`/streets/${s.id}`} className="group rounded-xl border p-4 hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring transition-colors">
+            <Link key={s.id} href={`/streets/${s.id}`} className="group rounded-xl border bg-background p-4 hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring transition-colors">
               <div className="flex items-center justify-between">
                 <div className="font-medium group-hover:underline">{s.name}</div>
                 <StatusBadge status={s.lastStatus} />
