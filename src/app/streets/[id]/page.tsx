@@ -83,17 +83,31 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
             {dest ? <DirectionsButton dest={dest} className="ml-auto" /> : null}
           </div>
           <div className="mt-3">
-            <StreetMap
-              data={fc}
-              status={s.visits[0]?.status ?? null}
-              photos={(s.photos as any[])
-                .filter((p) => p.lng != null && p.lat != null)
+            {(() => {
+              const notesWithGeo = (s.notes as any[]).filter((n) => (n as any).lng != null && (n as any).lat != null)
+              const noteIdsWithGeo = new Set(notesWithGeo.map((n) => n.id))
+              const noteMarkers = notesWithGeo.map((n) => {
+                // Show a photo in the popup if the note has any attached photo (regardless of photo geotagging)
+                const gp = (s.photos as any[]).find((p) => p.noteId === n.id)
+                const text = n.content ? stripMarkdown(n.content).slice(0, 120) : undefined
+                return { id: `note-${n.id}`, lng: (n as any).lng, lat: (n as any).lat, url: gp?.url, text }
+              })
+              const photoMarkers = (s.photos as any[])
+                .filter((p) => p.lng != null && p.lat != null && !noteIdsWithGeo.has(p.noteId))
                 .map((p) => {
                   const note = (s.notes as any[]).find((n) => p.noteId === n.id)
                   const text = note?.content ? stripMarkdown(note.content).slice(0, 120) : undefined
-                  return { id: p.id, lng: p.lng, lat: p.lat, url: p.url, text }
-                })}
-            />
+                  return { id: `photo-${p.id}`, lng: p.lng, lat: p.lat, url: p.url, text }
+                })
+              const markers = [...noteMarkers, ...photoMarkers]
+              return (
+                <StreetMap
+                  data={fc}
+                  status={s.visits[0]?.status ?? null}
+                  photos={markers}
+                />
+              )
+            })()}
           </div>
         </div>
   <div className="rounded-xl border bg-background p-4 space-y-3">
@@ -121,12 +135,12 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
   )
 }
 
-function NotesList({ notes, streetId }: { notes: { id: string, content: string, createdAt: Date, tags: string[] }[], streetId: string }) {
+function NotesList({ notes, streetId }: { notes: { id: string, content: string, createdAt: Date, tags: string[], lng?: number | null, lat?: number | null }[], streetId: string }) {
   return (
     <ul className="space-y-3">
-      {notes.map((n) => (
-  <li key={n.id} className="rounded-md border p-3">
-          <NoteView id={n.id} content={n.content} createdAt={n.createdAt} tags={n.tags} streetId={streetId} />
+    {notes.map((n) => (
+  <li key={n.id} id={`note-${n.id}`} className="rounded-md border p-3">
+      <NoteView id={n.id} content={n.content} createdAt={n.createdAt} tags={n.tags} streetId={streetId} hasGeo={((n as any).lng != null) && ((n as any).lat != null)} />
         </li>
       ))}
     </ul>

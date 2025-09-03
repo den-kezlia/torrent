@@ -33,7 +33,7 @@ export const streetDetailSchema = z.object({
       lat: z.number().nullable().optional()
     })
   ),
-  notes: z.array(z.object({ id: z.string(), content: z.string(), tags: z.array(z.string()), createdAt: z.string() })),
+  notes: z.array(z.object({ id: z.string(), content: z.string(), tags: z.array(z.string()), createdAt: z.string(), lng: z.number().nullable().optional(), lat: z.number().nullable().optional() })),
   lastStatus: visitStatusEnum.nullable()
 })
 

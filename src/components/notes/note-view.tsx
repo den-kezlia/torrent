@@ -5,7 +5,7 @@ import { EditNote } from './edit-note'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useRouter } from 'next/navigation'
 
-export function NoteView({ id, content, createdAt, tags, streetId }: { id: string, content: string, createdAt: string | Date, tags: string[], streetId: string }) {
+export function NoteView({ id, content, createdAt, tags, streetId, hasGeo }: { id: string, content: string, createdAt: string | Date, tags: string[], streetId: string, hasGeo?: boolean }) {
   const [editing, setEditing] = useState(false)
   const date = typeof createdAt === 'string' ? new Date(createdAt) : createdAt
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -31,7 +31,7 @@ export function NoteView({ id, content, createdAt, tags, streetId }: { id: strin
       {!editing ? (
         <NoteMarkdown content={content} />
       ) : (
-        <EditNote id={id} initial={content} streetId={streetId} onDone={() => setEditing(false)} />
+        <EditNote id={id} initial={content} streetId={streetId} onDone={() => setEditing(false)} initialHasGeo={!!hasGeo} />
       )}
       {tags?.length ? (
         <div className="mt-1 text-xs text-muted-foreground">{tags.map((t) => `#${t}`).join(' ')}</div>

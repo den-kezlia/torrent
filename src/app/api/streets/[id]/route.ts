@@ -35,7 +35,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
       lng: (p as any).lng ?? null,
       lat: (p as any).lat ?? null
     })),
-    notes: s.notes.map((n) => ({ id: n.id, content: n.content, tags: n.tags, createdAt: n.createdAt.toISOString() })),
+  notes: s.notes.map((n) => ({ id: n.id, content: n.content, tags: n.tags, createdAt: n.createdAt.toISOString(), lng: (n as any).lng ?? null, lat: (n as any).lat ?? null })),
     lastStatus: s.visits[0]?.status ?? null
   })
   return Response.json(out)

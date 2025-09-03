@@ -22,7 +22,7 @@ function colorForStatus(status: string | null | undefined) {
 export function StreetMap({
   data,
   status,
-  photos
+  photos: markers
 }: {
   data: FeatureCollection<LineString, { status?: string }>
   status: string | null | undefined
@@ -31,7 +31,7 @@ export function StreetMap({
   const ref = useRef<HTMLDivElement>(null)
   const mapRef = useRef<Map | null>(null)
   const isDarkRef = useRef<boolean>(false)
-  const photosRef = useRef<typeof photos>(photos)
+  const photosRef = useRef<typeof markers>(markers)
 
   useEffect(() => {
     if (!ref.current) return
@@ -153,20 +153,20 @@ export function StreetMap({
       map.remove()
       mapRef.current = null
     }
-  }, [data, status, photos])
+  }, [data, status, markers])
 
   // Update photo markers when props change
   useEffect(() => {
-  photosRef.current = photos
+    photosRef.current = markers
     const map = mapRef.current
     if (!map) return
-    const features: Feature<Point, { id: string; text?: string; url?: string }>[] = (photos || [])
+    const features: Feature<Point, { id: string; text?: string; url?: string }>[] = (markers || [])
       .filter((p) => typeof p.lng === 'number' && typeof p.lat === 'number')
       .map((p) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [p.lng, p.lat] }, properties: { id: p.id, text: p.text, url: p.url } }))
     const fc = { type: 'FeatureCollection', features } as const
     const src = map.getSource('photo-points') as any
     if (src) src.setData(fc)
-  }, [photos])
+  }, [markers])
 
   return <div ref={ref} className="h-80 w-full rounded-md border" aria-label="Street map" />
 }

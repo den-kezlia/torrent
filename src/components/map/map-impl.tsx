@@ -22,6 +22,7 @@ export function MapImpl() {
   const mapRef = useRef<Map | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const isDarkRef = useRef<boolean>(false)
+  const markersAbortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
     if (!ref.current) return
@@ -48,7 +49,7 @@ export function MapImpl() {
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
     map.addControl(new maplibregl.AttributionControl({ compact: true }))
 
-    function updateData() {
+  function updateData() {
       if (!mapRef.current) return
       const b = mapRef.current.getBounds()
       const minX = b.getWest()
@@ -69,6 +70,34 @@ export function MapImpl() {
         .catch(() => {})
     }
 
+    function updateMarkers() {
+      if (!mapRef.current) return
+      const b = mapRef.current.getBounds()
+      const minX = b.getWest()
+      const minY = b.getSouth()
+      const maxX = b.getEast()
+      const maxY = b.getNorth()
+      const url = `/api/markers?bbox=${minX},${minY},${maxX},${maxY}`
+      markersAbortRef.current?.abort()
+      const controller = new AbortController()
+      markersAbortRef.current = controller
+      fetch(url, { signal: controller.signal })
+        .then((r) => (r.ok ? r.json() : Promise.reject(new Error('Failed to load markers'))))
+        .then((res) => {
+          const features: any[] = []
+          for (const p of res.photos || []) {
+            features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [p.lng, p.lat] }, properties: { id: `photo-${p.id}`, url: p.url, streetId: p.streetId, noteId: p.noteId, text: p.text } })
+          }
+          for (const n of res.notes || []) {
+            features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [n.lng, n.lat] }, properties: { id: `note-${n.id}`, url: n.url, text: n.text, streetId: n.streetId, noteId: n.id } })
+          }
+          const fc = { type: 'FeatureCollection', features }
+          const src = mapRef.current?.getSource('poi-markers') as any
+          if (src) src.setData(fc)
+        })
+        .catch(() => {})
+    }
+
     map.on('load', () => {
       map.addSource('streets', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       map.addLayer({
@@ -80,9 +109,28 @@ export function MapImpl() {
           'line-width': 3
         }
       })
+      map.addSource('poi-markers', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+      map.addLayer({ id: 'poi-markers', type: 'circle', source: 'poi-markers', paint: { 'circle-radius': 7, 'circle-color': '#3b82f6', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 1.5 } })
+
+      map.on('click', 'poi-markers', (e) => {
+        const f = (e.features && e.features[0]) as any
+        if (!f) return
+        const coords = f.geometry.coordinates.slice()
+  const text = f.properties?.text as string | undefined
+  const url = f.properties?.url as string | undefined
+  const streetId = f.properties?.streetId as string | undefined
+  const noteId = f.properties?.noteId as string | undefined
+        const img = url ? `<img src="${escapeAttr(url)}" alt="Photo" style="display:block;max-width:100%;width:auto;height:auto;max-height:220px;border-radius:6px;margin:0 0 6px 0;object-fit:contain"/>` : ''
+  const caption = text ? `<div style="font-size:12px;line-height:1.3;color:#0f172a;">${escapeHtml(text)}</div>` : ''
+  const link = streetId ? `<div style="margin-top:6px"><a href="/streets/${escapeAttr(streetId)}${noteId ? `#note-${escapeAttr(noteId)}` : ''}" style="font-size:12px;color:#2563eb;text-decoration:underline">Open street</a></div>` : ''
+  const html = `<div style="max-width:300px">${img}${caption}${link}</div>`
+        new maplibregl.Popup({ closeOnClick: true, maxWidth: '320px' }).setLngLat(coords).setHTML(html).addTo(map)
+      })
+
       updateData()
+      updateMarkers()
     })
-    map.on('moveend', updateData)
+    map.on('moveend', () => { updateData(); updateMarkers() })
 
     // Observe theme changes and update style without losing layers
     const updateTheme = () => {
@@ -104,7 +152,14 @@ export function MapImpl() {
             paint: { 'line-color': statusColorExpr(), 'line-width': 3 }
           })
         }
+        if (!map.getSource('poi-markers')) {
+          map.addSource('poi-markers', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+        }
+        if (!map.getLayer('poi-markers')) {
+          map.addLayer({ id: 'poi-markers', type: 'circle', source: 'poi-markers', paint: { 'circle-radius': 7, 'circle-color': '#3b82f6', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 1.5 } })
+        }
         updateData()
+        updateMarkers()
       })
     }
 
@@ -112,7 +167,8 @@ export function MapImpl() {
     mo.observe(html, { attributes: true, attributeFilter: ['class'] })
 
     return () => {
-      abortRef.current?.abort()
+  abortRef.current?.abort()
+  markersAbortRef.current?.abort()
       mo.disconnect()
       map.remove()
       mapRef.current = null
@@ -138,4 +194,20 @@ export function MapImpl() {
       </div>
     </div>
   )
+}
+
+function escapeHtml(str: string) {
+  return str
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+}
+
+function escapeAttr(str: string) {
+  return str
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
 }

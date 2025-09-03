@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache'
 
 const bodySchema = z.object({
   content: z.string().min(1),
-  tags: z.array(z.string()).default([])
+  tags: z.array(z.string()).default([]),
+  geolocation: z.object({ lng: z.number(), lat: z.number() }).optional()
 })
 
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -17,11 +18,14 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   if (!parsedBody.success) return Response.json({ error: 'Invalid body' }, { status: 400 })
 
   const note = await prisma.note.create({
+    // cast any until Prisma client regenerated with lng/lat columns on Note
     data: {
       streetId: id,
       content: parsedBody.data.content,
-      tags: parsedBody.data.tags
-    }
+      tags: parsedBody.data.tags,
+      lng: parsedBody.data.geolocation?.lng,
+      lat: parsedBody.data.geolocation?.lat
+    } as any
   })
 
   // Link any uploaded photos referenced in the note content to this note
@@ -35,7 +39,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     if (urls.length) {
       const photos = await prisma.photo.findMany({ where: { streetId: id, url: { in: urls } } })
       if (photos.length) {
-        await prisma.photo.updateMany({ where: { id: { in: photos.map((p) => p.id) } }, data: { noteId: note.id } })
+  await prisma.photo.updateMany({ where: { id: { in: photos.map((p) => p.id) } }, data: { noteId: note.id } as any })
       }
     }
   } catch {}
