@@ -90,7 +90,7 @@ function NotesList({ notes, streetId }: { notes: { id: string, content: string, 
   return (
     <ul className="space-y-3">
       {notes.map((n) => (
-  <li key={n.id} className="rounded-xl border p-3">
+  <li key={n.id} className="rounded-md border p-3">
           <NoteView id={n.id} content={n.content} createdAt={n.createdAt} tags={n.tags} streetId={streetId} />
         </li>
       ))}

@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { RichTextEditor } from './rich-text-editor'
+import { Button } from '@/components/ui/button'
 
 export function AddNote({ streetId }: { streetId: string }) {
   const [value, setValue] = useState('')
@@ -44,9 +45,9 @@ export function AddNote({ streetId }: { streetId: string }) {
     <form className="space-y-2" onSubmit={submit} aria-label="Add a note">
       <RichTextEditor value={value} onChange={setValue} onUploadImage={uploadImage} placeholder="Write a note… Use toolbar for headings, lists, images." />
       <div className="flex justify-end">
-        <button className="rounded-md border px-3 py-2 text-sm" disabled={busy || !value.trim()}>
+        <Button disabled={busy || !value.trim()}>
           {busy ? 'Adding…' : 'Add note'}
-        </button>
+        </Button>
       </div>
     </form>
   )
