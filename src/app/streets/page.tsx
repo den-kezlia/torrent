@@ -2,6 +2,8 @@
 
 import { prisma } from '@/server/db'
 import Link from 'next/link'
+import { prettyStatus, normalizeStatus } from '@/lib/utils'
+import { StatusBadge } from '@/components/ui/status-badge'
 
 type SearchParams = {
   search?: string
@@ -61,7 +63,7 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
     lastStatus: s.visits[0]?.status ?? null
   }))
 
-  if (sp.status) items = items.filter((i) => i.lastStatus === sp.status)
+  if (sp.status) items = items.filter((i) => normalizeStatus(i.lastStatus) === sp.status)
 
   const visitedCount = allWithVisits.filter((s) => s.visits[0]?.status === 'VISITED').length
   const totalCount = totalAll
@@ -82,11 +84,11 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
         <form className="space-y-3" role="search" aria-label="Filter streets" method="get">
           <div className="space-y-1">
             <label className="text-sm font-medium" htmlFor="search">Search</label>
-            <input id="search" name="search" defaultValue={sp.search ?? ''} className="w-full rounded-md border px-3 py-2" placeholder="Search streets" />
+            <input id="search" name="search" defaultValue={sp.search ?? ''} className="w-full rounded-md border bg-background px-3 py-2 placeholder:text-muted-foreground" placeholder="Search streets" />
           </div>
           <div className="space-y-1">
             <label className="text-sm font-medium" htmlFor="status">Status</label>
-            <select id="status" name="status" defaultValue={sp.status ?? ''} className="w-full rounded-md border px-3 py-2">
+            <select id="status" name="status" defaultValue={sp.status ?? ''} className="w-full rounded-md border bg-background px-3 py-2">
               <option value="">All</option>
               <option value="PLANNED">Planned</option>
               <option value="IN_PROGRESS">In progress</option>
@@ -94,11 +96,11 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
             </select>
           </div>
           <div className="flex items-center gap-2">
-            <input id="hasPhotos" name="hasPhotos" type="checkbox" className="size-4" defaultChecked={sp.hasPhotos === 'on'} />
+            <input id="hasPhotos" name="hasPhotos" type="checkbox" className="size-4 border bg-background" defaultChecked={sp.hasPhotos === 'on'} />
             <label htmlFor="hasPhotos" className="text-sm">Has photos</label>
           </div>
           <div className="flex items-center gap-2">
-            <input id="hasNotes" name="hasNotes" type="checkbox" className="size-4" defaultChecked={sp.hasNotes === 'on'} />
+            <input id="hasNotes" name="hasNotes" type="checkbox" className="size-4 border bg-background" defaultChecked={sp.hasNotes === 'on'} />
             <label htmlFor="hasNotes" className="text-sm">Has notes</label>
           </div>
           <div>
@@ -126,7 +128,7 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
             <Link key={s.id} href={`/streets/${s.id}`} className="group rounded-xl border p-4 hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring transition-colors">
               <div className="flex items-center justify-between">
                 <div className="font-medium group-hover:underline">{s.name}</div>
-                <span className="text-xs rounded bg-muted px-2 py-0.5">{s.lastStatus ?? '—'}</span>
+                <StatusBadge status={s.lastStatus} />
               </div>
               <div className="text-sm text-muted-foreground mt-1">{s.segments} segments • {s.photos} photos • {s.notes} notes</div>
             </Link>

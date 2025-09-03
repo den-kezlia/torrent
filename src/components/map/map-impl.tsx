@@ -21,6 +21,7 @@ export function MapImpl() {
   const ref = useRef<HTMLDivElement>(null)
   const mapRef = useRef<Map | null>(null)
   const abortRef = useRef<AbortController | null>(null)
+  const isDarkRef = useRef<boolean>(false)
 
   useEffect(() => {
     if (!ref.current) return
@@ -30,9 +31,14 @@ export function MapImpl() {
       return
     }
 
+    const html = document.documentElement
+    isDarkRef.current = html.classList.contains('dark')
+    const getStyleUrl = () =>
+      `https://api.maptiler.com/maps/${isDarkRef.current ? 'streets-v2-dark' : 'streets-v2'}/style.json?key=${MAPTILER_KEY}`
+
     const map = new maplibregl.Map({
       container: ref.current,
-      style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`,
+      style: getStyleUrl(),
       center: [-0.465, 39.437], // Approx Torrent, Valencia
       zoom: 13,
       attributionControl: false
@@ -78,8 +84,36 @@ export function MapImpl() {
     })
     map.on('moveend', updateData)
 
+    // Observe theme changes and update style without losing layers
+    const updateTheme = () => {
+      const dark = html.classList.contains('dark')
+      if (dark === isDarkRef.current) return
+      isDarkRef.current = dark
+      const styleUrl = getStyleUrl()
+      // Swap style while preserving custom layers by re-adding them on style.load
+      map.setStyle(styleUrl)
+      map.once('style.load', () => {
+        if (!map.getSource('streets')) {
+          map.addSource('streets', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+        }
+        if (!map.getLayer('streets-line')) {
+          map.addLayer({
+            id: 'streets-line',
+            type: 'line',
+            source: 'streets',
+            paint: { 'line-color': statusColorExpr(), 'line-width': 3 }
+          })
+        }
+        updateData()
+      })
+    }
+
+    const mo = new MutationObserver(updateTheme)
+    mo.observe(html, { attributes: true, attributeFilter: ['class'] })
+
     return () => {
       abortRef.current?.abort()
+      mo.disconnect()
       map.remove()
       mapRef.current = null
     }
@@ -87,8 +121,8 @@ export function MapImpl() {
 
   return (
     <div className="relative">
-      <div ref={ref} className="h-[80vh] w-full rounded-md border" aria-label="Map" />
-      <div className="pointer-events-none absolute left-2 top-2 rounded-md bg-white/90 p-2 text-xs shadow">
+  <div ref={ref} className="h-[80vh] w-full rounded-md border" aria-label="Map" />
+  <div className="pointer-events-none absolute left-2 top-2 rounded-md bg-background/90 p-2 text-xs text-foreground shadow">
         <div className="flex items-center gap-2">
           <span className="inline-block h-2 w-4 rounded-sm bg-green-600" />
           Visited

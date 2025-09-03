@@ -8,6 +8,7 @@ import { NoteView } from '@/components/notes/note-view'
 import type { FeatureCollection, LineString } from 'geojson'
 import StreetMap from '@/components/map/street-map'
 import DirectionsButton from '@/components/map/directions-button'
+import { prettyStatus } from '@/lib/utils'
 import { PhotoDeleteButton } from '@/components/photos/delete-button'
 import { PhotoGrid } from '@/components/photos/photo-grid'
 
@@ -29,7 +30,7 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
     </main>
   )
 
-  const lastStatus = s.visits[0]?.status ?? '—'
+  const lastStatus = s.visits[0]?.status ?? null
   const fc: FeatureCollection<LineString, { status?: string }> = {
     type: 'FeatureCollection',
     features: s.segments
@@ -50,18 +51,17 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
       <Link href="/streets" className="text-sm text-muted-foreground hover:underline">← Back</Link>
       <h1 className="text-2xl font-semibold tracking-tight">{s.name}</h1>
       <section className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-xl border p-4 space-y-3">
+  <div className="rounded-xl border bg-background p-4 space-y-3">
           <div className="flex flex-wrap items-center gap-3 text-sm">
             <span className="font-medium">Status</span>
-            <span className="rounded bg-muted px-2 py-0.5">{lastStatus}</span>
-            <VisitStatusPicker streetId={s.id} value={s.visits[0]?.status ?? null} />
+              <VisitStatusPicker streetId={s.id} value={s.visits[0]?.status ?? null} />
             {dest ? <DirectionsButton dest={dest} className="ml-auto" /> : null}
           </div>
           <div className="mt-3">
             <StreetMap data={fc} status={s.visits[0]?.status ?? null} />
           </div>
         </div>
-        <div className="rounded-xl border p-4 space-y-3">
+  <div className="rounded-xl border bg-background p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="font-medium">Gallery</h2>
             <PhotoUploader streetId={s.id} />
@@ -73,7 +73,7 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
           )}
         </div>
       </section>
-      <section className="rounded-xl border p-4 space-y-3">
+  <section className="rounded-xl border bg-background p-4 space-y-3">
         <h2 className="font-medium">Notes</h2>
   <AddNote streetId={s.id} />
         {s.notes.length === 0 ? (

@@ -45,7 +45,7 @@ export function AddNote({ streetId }: { streetId: string }) {
     <form className="space-y-2" onSubmit={submit} aria-label="Add a note">
       <RichTextEditor value={value} onChange={setValue} onUploadImage={uploadImage} placeholder="Write a note… Use toolbar for headings, lists, images." />
       <div className="flex justify-end">
-        <Button disabled={busy || !value.trim()}>
+        <Button variant="ghost" className="border border-foreground/20 text-muted-foreground hover:text-foreground hover:bg-muted" disabled={busy || !value.trim()}>
           {busy ? 'Adding…' : 'Add note'}
         </Button>
       </div>

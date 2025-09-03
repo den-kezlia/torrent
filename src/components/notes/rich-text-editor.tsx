@@ -102,7 +102,7 @@ export function RichTextEditor({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="min-h-28 w-full resize-y rounded-b-md p-3 outline-none"
+  className="min-h-28 w-full resize-y rounded-b-md bg-background p-3 text-foreground placeholder:text-muted-foreground outline-none"
       />
     </div>
   )

@@ -22,9 +22,9 @@ export function NoteView({ id, content, createdAt, tags, streetId }: { id: strin
           {new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(date)}
         </time>
         {!editing ? (
-          <div className="flex gap-3">
-            <button className="text-xs underline" onClick={() => setEditing(true)}>Edit</button>
-            <button className="text-xs text-destructive underline" onClick={() => setConfirmOpen(true)}>Delete</button>
+          <div className="flex gap-2">
+            <button className="text-xs rounded-md border px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => setEditing(true)}>Edit</button>
+            <button className="text-xs rounded-md border px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => setConfirmOpen(true)}>Delete</button>
           </div>
         ) : null}
       </div>

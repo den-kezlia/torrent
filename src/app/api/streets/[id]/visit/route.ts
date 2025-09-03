@@ -15,3 +15,12 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   await prisma.visit.create({ data: { streetId: parsedParams.data.id, status: parsedBody.data.status } })
   return Response.json({ ok: true, status: parsedBody.data.status })
 }
+
+export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const params = await ctx.params
+  const parsedParams = paramsSchema.safeParse(params)
+  if (!parsedParams.success) return Response.json({ error: 'Invalid id' }, { status: 400 })
+  // Clear all visits to unset status
+  await prisma.visit.deleteMany({ where: { streetId: parsedParams.data.id } })
+  return Response.json({ ok: true })
+}

@@ -28,6 +28,7 @@ export function StreetMap({
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const mapRef = useRef<Map | null>(null)
+  const isDarkRef = useRef<boolean>(false)
 
   useEffect(() => {
     if (!ref.current) return
@@ -36,9 +37,14 @@ export function StreetMap({
       return
     }
 
+    const html = document.documentElement
+    isDarkRef.current = html.classList.contains('dark')
+    const getStyleUrl = () =>
+      `https://api.maptiler.com/maps/${isDarkRef.current ? 'streets-v2-dark' : 'streets-v2'}/style.json?key=${MAPTILER_KEY}`
+
     const map = new maplibregl.Map({
       container: ref.current,
-      style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`,
+      style: getStyleUrl(),
       center: [-0.465, 39.437],
       zoom: 13,
       attributionControl: false
@@ -47,7 +53,7 @@ export function StreetMap({
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
     map.addControl(new maplibregl.AttributionControl({ compact: true }))
 
-    map.on('load', () => {
+  map.on('load', () => {
       map.addSource('street', { type: 'geojson', data })
       map.addLayer({
         id: 'street-line',
@@ -68,7 +74,34 @@ export function StreetMap({
       } catch {}
     })
 
+    const updateTheme = () => {
+      const dark = html.classList.contains('dark')
+      if (dark === isDarkRef.current) return
+      isDarkRef.current = dark
+      map.setStyle(getStyleUrl())
+      map.once('style.load', () => {
+        if (!map.getSource('street')) {
+          map.addSource('street', { type: 'geojson', data })
+        } else {
+          const src = map.getSource('street') as any
+          src.setData(data)
+        }
+        if (!map.getLayer('street-line')) {
+          map.addLayer({
+            id: 'street-line',
+            type: 'line',
+            source: 'street',
+            paint: { 'line-color': colorForStatus(status), 'line-width': 4 }
+          })
+        }
+      })
+    }
+
+    const mo = new MutationObserver(updateTheme)
+    mo.observe(html, { attributes: true, attributeFilter: ['class'] })
+
     return () => {
+      mo.disconnect()
       map.remove()
       mapRef.current = null
     }
