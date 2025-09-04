@@ -30,7 +30,7 @@ export function PhotoUploader({ streetId }: { streetId: string }) {
   return (
     <label className="inline-flex items-center gap-2 text-sm">
       <span className="sr-only">Upload photo</span>
-      <button type="button" className="rounded-md border px-3 py-2 text-sm" onClick={() => document.getElementById(`file-${streetId}`)?.click()} disabled={busy}>
+  <button type="button" className="rounded-md border px-3 py-2 text-sm bg-foreground/5 hover:bg-foreground/10 dark:bg-foreground/10 dark:hover:bg-foreground/20" onClick={() => document.getElementById(`file-${streetId}`)?.click()} disabled={busy}>
         {busy ? 'Uploading…' : 'Choose file'}
       </button>
       <input id={`file-${streetId}`} type="file" onChange={onFileChange} disabled={busy} className="hidden" aria-label="Upload photo" />

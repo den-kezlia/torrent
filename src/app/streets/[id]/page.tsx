@@ -77,9 +77,8 @@ export default async function StreetDetailsPage({ params }: { params: Promise<{ 
       <h1 className="text-2xl font-semibold tracking-tight">{s.name}</h1>
       <section className="grid gap-6 md:grid-cols-2">
   <div className="rounded-xl border bg-background p-4 space-y-3">
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <span className="font-medium">Status</span>
-              <VisitStatusPicker streetId={s.id} value={s.visits[0]?.status ?? null} />
+      <div className="flex flex-wrap items-center gap-3 text-sm">
+        <VisitStatusPicker streetId={s.id} value={s.visits[0]?.status ?? null} />
             {dest ? <DirectionsButton dest={dest} className="ml-auto" /> : null}
           </div>
           <div className="mt-3">
