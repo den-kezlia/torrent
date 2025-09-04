@@ -38,7 +38,7 @@ export function PhotoGrid({ photos }: { photos: Photo[] }) {
         {ordered.map((p, i) => (
           <div key={p.id} onClick={() => openAt(i)} className="group relative block overflow-hidden rounded-md border cursor-pointer">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={p.url} alt="Street photo" className="aspect-square object-cover" />
+            <img src={p.url} alt="Street photo" className="aspect-square object-contain bg-muted" />
             {p.noteId == null ? (
               <div className="absolute right-2 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                 <PhotoDeleteButton id={p.id} canDelete={true} />

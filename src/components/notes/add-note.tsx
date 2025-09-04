@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { RichTextEditor } from './rich-text-editor'
 import { Button } from '@/components/ui/button'
+import { extractGps, resizeToJpeg } from '@/lib/image'
 
 export function AddNote({ streetId }: { streetId: string }) {
   const [value, setValue] = useState('')
@@ -45,14 +46,19 @@ export function AddNote({ streetId }: { streetId: string }) {
   }
 
   async function uploadImage(file: File): Promise<string> {
-    // Reuse photos API for storage. We upload and get a public URL back.
+    // Resize without cropping and preserve GPS via headers
+    const { lng, lat } = await extractGps(file)
+    const jpeg = await resizeToJpeg(file, { maxDim: 2048, quality: 0.82 })
+    const filename = (file.name || 'image').replace(/\.[^.]+$/, '') + '.jpg'
     const res = await fetch(`/api/streets/${streetId}/photos`, {
       method: 'POST',
       headers: {
-        'content-type': file.type || 'application/octet-stream',
-        'x-filename': encodeURIComponent(file.name)
+        'content-type': 'image/jpeg',
+        'x-filename': encodeURIComponent(filename),
+        ...(lng != null ? { 'x-gps-lng': String(lng) } : {}),
+        ...(lat != null ? { 'x-gps-lat': String(lat) } : {})
       },
-      body: await file.arrayBuffer()
+      body: jpeg
     })
     if (!res.ok) throw new Error('Upload failed')
     const json = await res.json()

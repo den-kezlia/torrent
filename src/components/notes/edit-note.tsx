@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { RichTextEditor } from './rich-text-editor'
+import { extractGps, resizeToJpeg } from '@/lib/image'
 
 export function EditNote({ id, initial, streetId, onDone, initialHasGeo = false }: { id: string, initial: string, streetId: string, onDone?: () => void, initialHasGeo?: boolean }) {
   const [value, setValue] = useState(initial)
@@ -10,13 +11,18 @@ export function EditNote({ id, initial, streetId, onDone, initialHasGeo = false 
   const router = useRouter()
 
   async function uploadImage(file: File): Promise<string> {
+    const { lng, lat } = await extractGps(file)
+    const jpeg = await resizeToJpeg(file, { maxDim: 2048, quality: 0.82 })
+    const filename = (file.name || 'image').replace(/\.[^.]+$/, '') + '.jpg'
     const res = await fetch(`/api/streets/${streetId}/photos`, {
       method: 'POST',
       headers: {
-        'content-type': file.type || 'application/octet-stream',
-        'x-filename': encodeURIComponent(file.name)
+        'content-type': 'image/jpeg',
+        'x-filename': encodeURIComponent(filename),
+        ...(lng != null ? { 'x-gps-lng': String(lng) } : {}),
+        ...(lat != null ? { 'x-gps-lat': String(lat) } : {})
       },
-      body: await file.arrayBuffer()
+      body: jpeg
     })
     if (!res.ok) throw new Error('Upload failed')
     const json = await res.json()
