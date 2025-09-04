@@ -97,6 +97,45 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
     }
   }
 
+  // If a status is selected, pre-filter streets by their latest visit status via raw SQL, then constrain Prisma query by IDs.
+  if (sp.status) {
+    const conditions: Prisma.Sql[] = []
+    if (sp.search) conditions.push(Prisma.sql`s.name ILIKE ${'%' + sp.search + '%'}`)
+    if (sp.hasPhotos === 'on')
+      conditions.push(Prisma.sql`EXISTS (SELECT 1 FROM "Photo" p WHERE p."streetId" = s.id)`)
+    if (sp.hasNotes === 'on')
+      conditions.push(Prisma.sql`EXISTS (SELECT 1 FROM "Note" n WHERE n."streetId" = s.id)`)
+    if (nearbyIds && nearbyIds.length)
+      conditions.push(
+        Prisma.sql`s.id IN (${Prisma.join(nearbyIds.map((id) => Prisma.sql`${id}`), ', ')})`
+      )
+  // Require latest visit to match selected status (cast enum to text for safe comparison)
+  conditions.push(Prisma.sql`lv.status::text = ${sp.status}`)
+
+    const whereSql = conditions.length
+      ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+      : Prisma.empty
+
+    const rows = await withRetry(() => prisma.$queryRaw<{ id: string }[]>`
+      SELECT s.id
+      FROM "Street" s
+      LEFT JOIN LATERAL (
+        SELECT v.status
+        FROM "Visit" v
+        WHERE v."streetId" = s.id
+        ORDER BY v.at DESC
+        LIMIT 1
+      ) lv ON true
+      ${whereSql}
+    `)
+    const statusIds = rows.map((r) => r.id)
+    if (statusIds.length) {
+      where.id = { in: statusIds }
+    } else {
+      where.id = { in: ['__none__'] }
+    }
+  }
+
   let itemsRaw: Array<any> = []
   let totalAll = 0
   let visitedCountRaw = 0
@@ -164,6 +203,7 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
     lastStatus: s.visits[0]?.status ?? null
   }))
 
+  // Safety net: keep client-side filter too, though server-side prefilter above should already limit the set
   if (sp.status) items = items.filter((i) => normalizeStatus(i.lastStatus) === sp.status)
 
   const visitedCount = visitedCountRaw
