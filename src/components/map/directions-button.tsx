@@ -22,7 +22,7 @@ export function DirectionsButton({
       target="_blank"
       rel="noreferrer"
       className={cn(
-  'inline-flex items-center rounded-md px-3 py-2 text-sm transition-colors border border-foreground/20 text-muted-foreground hover:text-foreground hover:bg-muted',
+  'inline-flex items-center rounded-md px-3 py-2 text-sm transition-colors border border-foreground/20 text-muted-foreground bg-foreground/5 hover:bg-foreground/10 hover:text-foreground dark:bg-foreground/10 dark:hover:bg-foreground/20',
         className
       )}
     >
