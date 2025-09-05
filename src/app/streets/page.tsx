@@ -263,7 +263,7 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
             <span>Progress</span>
             <span>{visitedCount}/{totalCount} ({progressPct}%)</span>
           </div>
-          <progress className="w-full h-2 [&::-webkit-progress-bar]:bg-foreground/20 [&::-webkit-progress-value]:bg-primary rounded" value={Number(visitedCount)} max={Number(Math.max(1, totalCount))} aria-label="Visited progress" />
+          <progress className="w-full h-2 [&::-webkit-progress-bar]:bg-muted/80 [&::-webkit-progress-value]:bg-foreground rounded" value={Number(visitedCount)} max={Number(Math.max(1, totalCount))} aria-label="Visited progress" />
         </div>
       </aside>
       <section className="space-y-4">
@@ -280,7 +280,7 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
         </div>
         <div role="region" aria-label="Streets list" className="grid gap-3">
           {items.map((s) => (
-            <Link key={s.id} href={`/streets/${s.id}`} className="group rounded-xl border bg-background p-4 hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring transition-colors">
+            <Link key={s.id} href={`/streets/${s.id}`} className="group rounded-xl border bg-background p-4 hover:bg-muted/50 hover:shadow-lg dark:hover:shadow-none focus:outline-none focus:ring-2 focus:ring-ring transition-all">
               <div className="flex items-center justify-between">
                 <div className="font-medium group-hover:underline">{s.name}</div>
                 <StatusBadge status={s.lastStatus} />
