@@ -1,7 +1,7 @@
 "use client"
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { extractGps, resizeToJpeg } from '@/lib/image'
+import { extractGps, compressToUnderJpeg } from '@/lib/image'
 
 export function PhotoUploader({ streetId }: { streetId: string }) {
   const [busy, setBusy] = useState(false)
@@ -16,8 +16,8 @@ export function PhotoUploader({ streetId }: { streetId: string }) {
     try {
       // Extract GPS before resize (resizing strips EXIF)
       const { lng, lat } = await extractGps(f)
-      // Resize to reasonable JPEG size
-      const jpeg = await resizeToJpeg(f, { maxDim: 2048, quality: 0.82 })
+  // Compress to <=5MB without resizing/cropping
+  const jpeg = await compressToUnderJpeg(f, { targetBytes: 3 * 1024 * 1024, initialQuality: 0.9, minQuality: 0.6 })
       const filename = (f.name || 'photo').replace(/\.[^.]+$/, '') + '.jpg'
 
       const res = await fetch(`/api/streets/${streetId}/photos`, {

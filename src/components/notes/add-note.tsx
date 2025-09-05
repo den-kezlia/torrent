@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { RichTextEditor } from './rich-text-editor'
 import { Button } from '@/components/ui/button'
-import { extractGps, resizeToJpeg } from '@/lib/image'
+import { extractGps, compressToUnderJpeg } from '@/lib/image'
 
 export function AddNote({ streetId }: { streetId: string }) {
   const [value, setValue] = useState('')
@@ -47,8 +47,8 @@ export function AddNote({ streetId }: { streetId: string }) {
 
   async function uploadImage(file: File): Promise<string> {
     // Resize without cropping and preserve GPS via headers
-    const { lng, lat } = await extractGps(file)
-    const jpeg = await resizeToJpeg(file, { maxDim: 2048, quality: 0.82 })
+  const { lng, lat } = await extractGps(file)
+  const jpeg = await compressToUnderJpeg(file, { targetBytes: 3 * 1024 * 1024, initialQuality: 0.9, minQuality: 0.6 })
     const filename = (file.name || 'image').replace(/\.[^.]+$/, '') + '.jpg'
     const res = await fetch(`/api/streets/${streetId}/photos`, {
       method: 'POST',
