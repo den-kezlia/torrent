@@ -263,7 +263,7 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
             <span>Progress</span>
             <span>{visitedCount}/{totalCount} ({progressPct}%)</span>
           </div>
-          <progress className="w-full h-2 [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-primary rounded" value={Number(visitedCount)} max={Number(Math.max(1, totalCount))} aria-label="Visited progress" />
+          <progress className="w-full h-2 [&::-webkit-progress-bar]:bg-foreground/20 [&::-webkit-progress-value]:bg-primary rounded" value={Number(visitedCount)} max={Number(Math.max(1, totalCount))} aria-label="Visited progress" />
         </div>
       </aside>
       <section className="space-y-4">
