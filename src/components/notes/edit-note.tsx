@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { RichTextEditor } from './rich-text-editor'
-import { extractGps, resizeToJpeg } from '@/lib/image'
+import { extractGps, compressToUnderJpeg } from '@/lib/image'
 
 export function EditNote({ id, initial, streetId, onDone, initialHasGeo = false }: { id: string, initial: string, streetId: string, onDone?: () => void, initialHasGeo?: boolean }) {
   const [value, setValue] = useState(initial)
@@ -11,8 +11,8 @@ export function EditNote({ id, initial, streetId, onDone, initialHasGeo = false 
   const router = useRouter()
 
   async function uploadImage(file: File): Promise<string> {
-    const { lng, lat } = await extractGps(file)
-    const jpeg = await resizeToJpeg(file, { maxDim: 2048, quality: 0.82 })
+  const { lng, lat } = await extractGps(file)
+  const jpeg = await compressToUnderJpeg(file, { targetBytes: 3 * 1024 * 1024, initialQuality: 0.9, minQuality: 0.6 })
     const filename = (file.name || 'image').replace(/\.[^.]+$/, '') + '.jpg'
     const res = await fetch(`/api/streets/${streetId}/photos`, {
       method: 'POST',
