@@ -4,6 +4,7 @@ import { prisma } from '@/server/db'
 import { Prisma } from '@prisma/client'
 import Link from 'next/link'
 import NearbyForm from './nearby-form'
+import SearchScroller from './search-scroller'
 import { prettyStatus, normalizeStatus } from '@/lib/utils'
 import { StatusBadge } from '@/components/ui/status-badge'
 
@@ -220,6 +221,7 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
 
   return (
     <main className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-4">
+      <SearchScroller />
       <aside className="space-y-4">
         <h1 className="text-xl font-semibold">Streets</h1>
   <Link href="/streets/random" className="inline-flex w-full justify-center items-center rounded-md border px-3 py-2 text-sm bg-foreground/5 hover:bg-foreground/10 dark:bg-foreground/10 dark:hover:bg-foreground/20">
@@ -266,7 +268,7 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
           <progress className="w-full h-2 [&::-webkit-progress-bar]:bg-muted/80 [&::-webkit-progress-value]:bg-foreground rounded" value={Number(visitedCount)} max={Number(Math.max(1, totalCount))} aria-label="Visited progress" />
         </div>
       </aside>
-      <section className="space-y-4">
+      <section id="search-results" className="space-y-4">
   {loadError ? (
           <div className="rounded-md border border-red-300 bg-red-100/50 px-3 py-2 text-sm text-red-800">
             {loadError}
