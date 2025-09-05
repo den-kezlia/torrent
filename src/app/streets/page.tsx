@@ -253,6 +253,9 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
           <div>
             <button className="inline-flex w-full justify-center items-center rounded-md border px-3 py-2 text-sm bg-foreground/5 hover:bg-foreground/10 dark:bg-foreground/10 dark:hover:bg-foreground/20" type="submit">Apply</button>
           </div>
+          <div className="text-center">
+            <Link href="/streets" className="text-sm text-muted-foreground underline hover:text-foreground">Clear</Link>
+          </div>
         </form>
 
   <div className="mt-2 border-t pt-2">
@@ -287,20 +290,113 @@ export default async function StreetsPage({ searchParams }: { searchParams: Prom
           ))}
         </div>
         <div className="flex items-center justify-between">
-          <Link
-            className="inline-flex items-center rounded-md border px-3 py-2 text-sm disabled:opacity-50 bg-foreground/5 hover:bg-foreground/10 dark:bg-foreground/10 dark:hover:bg-foreground/20"
-            href={{ pathname: '/streets', query: buildQuery({ page: String(Math.max(1, page - 1)) }) }}
-            aria-disabled={page === 1}
-          >
-            Previous
-          </Link>
-          <div className="text-sm text-muted-foreground">Page {page}</div>
-          <Link
-            className="inline-flex items-center rounded-md border px-3 py-2 text-sm bg-foreground/5 hover:bg-foreground/10 dark:bg-foreground/10 dark:hover:bg-foreground/20"
-            href={{ pathname: '/streets', query: buildQuery({ page: String(page + 1) }) }}
-          >
-            Next
-          </Link>
+          {/* Previous button */}
+          {page > 1 ? (
+            <Link
+              className="inline-flex items-center rounded-md border px-3 py-2 text-sm bg-foreground/5 hover:bg-foreground/10 dark:bg-foreground/10 dark:hover:bg-foreground/20"
+              href={{ pathname: '/streets', query: buildQuery({ page: String(page - 1) }) }}
+            >
+              Previous
+            </Link>
+          ) : (
+            <button
+              className="inline-flex items-center rounded-md border px-3 py-2 text-sm opacity-50 cursor-not-allowed bg-foreground/5"
+              disabled
+            >
+              Previous
+            </button>
+          )}
+          
+          {/* Page numbers */}
+          <div className="flex items-center gap-1">
+            {(() => {
+              const totalPages = Math.ceil(totalAll / take)
+              const maxVisiblePages = 7
+              const pages: (number | string)[] = []
+              
+              if (totalPages <= maxVisiblePages) {
+                // Show all pages if total is small
+                for (let i = 1; i <= totalPages; i++) {
+                  pages.push(i)
+                }
+              } else {
+                // Show smart pagination with ellipsis
+                pages.push(1)
+                
+                if (page > 4) {
+                  pages.push('...')
+                }
+                
+                const start = Math.max(2, page - 2)
+                const end = Math.min(totalPages - 1, page + 2)
+                
+                for (let i = start; i <= end; i++) {
+                  if (i !== 1 && i !== totalPages) {
+                    pages.push(i)
+                  }
+                }
+                
+                if (page < totalPages - 3) {
+                  pages.push('...')
+                }
+                
+                if (totalPages > 1) {
+                  pages.push(totalPages)
+                }
+              }
+              
+              return pages.map((pageNum, index) => {
+                if (pageNum === '...') {
+                  return (
+                    <span key={`ellipsis-${index}`} className="px-2 py-1 text-sm text-muted-foreground">
+                      ...
+                    </span>
+                  )
+                }
+                
+                const isCurrentPage = pageNum === page
+                
+                return isCurrentPage ? (
+                  <span
+                    key={pageNum}
+                    className="inline-flex items-center rounded-md border px-3 py-2 text-sm bg-foreground text-background"
+                  >
+                    {pageNum}
+                  </span>
+                ) : (
+                  <Link
+                    key={pageNum}
+                    className="inline-flex items-center rounded-md border px-3 py-2 text-sm bg-foreground/5 hover:bg-foreground/10 dark:bg-foreground/10 dark:hover:bg-foreground/20"
+                    href={{ pathname: '/streets', query: buildQuery({ page: String(pageNum) }) }}
+                  >
+                    {pageNum}
+                  </Link>
+                )
+              })
+            })()}
+          </div>
+          
+          {/* Next button */}
+          {(() => {
+            const totalPages = Math.ceil(totalAll / take)
+            const hasNextPage = page < totalPages
+            
+            return hasNextPage ? (
+              <Link
+                className="inline-flex items-center rounded-md border px-3 py-2 text-sm bg-foreground/5 hover:bg-foreground/10 dark:bg-foreground/10 dark:hover:bg-foreground/20"
+                href={{ pathname: '/streets', query: buildQuery({ page: String(page + 1) }) }}
+              >
+                Next
+              </Link>
+            ) : (
+              <button
+                className="inline-flex items-center rounded-md border px-3 py-2 text-sm opacity-50 cursor-not-allowed bg-foreground/5"
+                disabled
+              >
+                Next
+              </button>
+            )
+          })()}
         </div>
       </section>
     </main>

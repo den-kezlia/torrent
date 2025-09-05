@@ -56,7 +56,6 @@ export default function NearbyForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-2" role="search" aria-label="Nearby streets">
       <div className="flex items-center gap-2">
-  <label htmlFor="nearby-radius" className="text-sm font-medium">Distance</label>
         <select id="nearby-radius" className="rounded-md border bg-background px-2 py-1 text-sm" value={radius} onChange={(e) => setRadius(e.target.value)}>
           <option value="100">100 m</option>
           <option value="300">300 m</option>
@@ -64,7 +63,7 @@ export default function NearbyForm() {
           <option value="1000">1000 m</option>
         </select>
   <button className="inline-flex flex-1 justify-center items-center rounded-md border px-3 py-2 text-sm disabled:opacity-50 bg-foreground/5 hover:bg-foreground/10 dark:bg-foreground/10 dark:hover:bg-foreground/20" disabled={busy} type="submit">
-          {busy ? 'Searching…' : 'Search nearby'}
+          {busy ? 'Searching…' : 'Search nearby streets'}
         </button>
       </div>
       <div className="flex justify-center">
